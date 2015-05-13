@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Hash</title>
+    <script src="../bin/router.js"></script>
+</head>
+<body>
+
+<div><a href="#home">'home'</a></div>
+<div><a href="#docs/16">'docs/:id(16)'</a></div>
+<div><a href="#docs/16/paragraph/17">'docs/:id(16)/paragraph/:number(17)'</a></div>
+<div><a href="#default">'default'</a></div>
+
+<script type="text/javascript">
+    function prettyJSON(object) {
+        var result = '';
+        console.log(object)
+        if (typeof object === 'object') {
+            result = '\n' + JSON.stringify(object,null,2);
+        } else if(typeof object === 'string') {
+            result = '\n' + object;
+        }
+
+        return result;
+    }
+
+    var pathHome = 'home';
+    var pathDoc = 'docs/:id';
+    var subpathParagraph = '/paragraph/:number'; // !!! you must use '/' for nested routing
+
+    Router
+            .config({mode: 'hash'})
+            .add(pathHome, function () {
+                alert(pathHome)
+            })
+            .add(pathDoc, function (params) {
+                alert(pathDoc + prettyJSON(params));
+            })
+            .add(function () { // default routing
+                alert('default');
+                Router.navigate(pathHome);
+            });
+
+    Router
+            .to(pathDoc)
+            .add(subpathParagraph, function (params) {
+                alert(subpathParagraph + prettyJSON(params));
+            });
+
+    Router.listen(); // todo listen & navigate
+    Router.navigate('home');
+
+</script>
+</body>
+</html>

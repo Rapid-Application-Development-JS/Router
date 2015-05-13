@@ -1,0 +1,20 @@
+{
+  "name": "untitled1",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yuriy Luchaninov <y.luchaninov@mobidev.biz> (http://mobidev.biz/)",
+  "license": "BSD-2-Clause",
+  "devDependencies": {
+    "gulp": "~3.8.11",
+    "gulp-concat": "~2.5.2",
+    "gulp-uglify": "~1.2.0",
+    "gulp-wrap-umd": "~0.2.1",
+    "run-sequence": "~1.0.2",
+    "mocha": "~2.2.4",
+    "chai": "~2.3.0"
+  }
+}
