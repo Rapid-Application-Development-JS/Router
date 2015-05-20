@@ -232,11 +232,13 @@ var Router = (function (facade) {
         if (mode === 'history') {
             fragment = _clearSlashes(decodeURI(location.pathname + location.search));
             fragment = fragment.replace(/\?(.*)$/, '');
-            fragment = root != '/' ? fragment.replace(root, '') : fragment;
+            fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+
         } else if (mode === 'hash') {
             var match = window.location.href.match(/#(.*)$/);
             fragment = match ? match[1] : '';
         }
+
         return _clearSlashes(fragment);
     }
 
@@ -255,14 +257,25 @@ var Router = (function (facade) {
         listen: function () {
             var self = this, current = _getFragment();
 
-            clearInterval(this._interval);
-            this._interval = setInterval(function () {
+            function check() {
                 var location = _getFragment();
                 if (current !== location) {
                     current = location;
                     self.check(current);
                 }
+            }
+
+            clearInterval(this._interval);
+            this._interval = setInterval(function () {
+                check();
             }, 50);
+
+            window.onpopstate = function (e) {
+                if (e.state !== null && e.state !== undefined) {
+                    clearInterval(self._interval);
+                    check();
+                }
+            };
         },
 
         navigate: function (path) {

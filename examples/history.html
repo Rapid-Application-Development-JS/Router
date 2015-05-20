@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>History</title>
+    <script src="../bin/router.js"></script>
+</head>
+<body>
+
+<div><a href="/home.html">'home'</a></div>
+<div><a href="/about.html">'about'</a></div>
+<div><a href="docs/16.html">'docs/:id(16.html)'</a></div>
+<div><a href="docs/16/paragraph/17.html">'docs/:id(16)/paragraph/:number(17.html)'</a></div>
+<div><a href="default">'default'</a></div>
+
+<script type="text/javascript">
+
+    function preventClick(e) {
+        e.preventDefault();
+        Router.navigate(e.target.getAttribute('href'));
+    }
+
+    var links = document.querySelectorAll('a');
+    for(var i = 0; i < links.length; i++){
+        links[i].addEventListener('click', preventClick, false);
+    }
+
+
+    function prettyJSON(object) {
+        var result = '';
+        if (typeof object === 'object') {
+            result = '\n' + JSON.stringify(object,null,2);
+        } else if(typeof object === 'string') {
+            result = '\n' + object;
+        }
+
+        return result;
+    }
+
+    Router
+            .config({
+                mode: 'history'
+            })
+            .add('home.html', function () {
+                alert('home');
+            })
+            .add('about.html', function () {
+                alert('about');
+            })
+            .add('docs/:id', function (params) {
+                alert('docs/:id' + prettyJSON(params));
+            })
+            .add(function () { // default routing
+                alert('default');
+                Router.navigate('/home.html');
+            });
+
+            Router.to('docs/:id')
+            .add('/paragraph/:id', function (params) {
+                alert('/paragraph/:id' + prettyJSON(params));
+            });
+
+    Router.listen();
+    Router.navigate('/home.html');
+
+</script>
+</body>
+</html>
