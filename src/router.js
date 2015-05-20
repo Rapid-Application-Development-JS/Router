@@ -1,5 +1,5 @@
 var _ALLOWED_MODES = ['node', 'hash', 'history'];
-var _DEFAULT_OPTIONS = { mode: 'node', keys: true, root: '/', rerouting: true};
+var _DEFAULT_OPTIONS = {mode: 'node', keys: true, root: '/', rerouting: true};
 
 // parse regular expression
 var _OPTIONAL_PARAM = /\((.*?)\)/g;
@@ -193,7 +193,7 @@ RoutingLevel.prototype.to = function (alias) {
 };
 
 var Router = (function (facade) {
-    var lastURL = '';
+    var lastURL = '', trigger = true;
 
     function apply(routes) {
         function applyNested(routes) {
@@ -232,9 +232,15 @@ var Router = (function (facade) {
     }
 
     return {
-        check: function (path) {
-            apply(facade.check(path, [], lastURL));
-            lastURL = path;
+        check: function (path, saveURL) {
+            if (trigger) {
+                apply(facade.check(path, [], lastURL));
+            } else
+                trigger = true;
+
+            if (saveURL || saveURL === undefined)
+                lastURL = path;
+
             return facade;
         },
 
@@ -267,15 +273,25 @@ var Router = (function (facade) {
             };
         },
 
-        navigate: function (path) {
+        navigate: function (path, options) {
             var mode = facade._options.mode, root = facade._options.root;
             path = path ? path : '';
-            if (mode === 'history') {
-                history.pushState(null, null, root + _clearSlashes(path));
-            } else {
-                window.location.href.match(/#(.*)$/);
-                window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
+
+            if (options && options.trigger === false) {
+                trigger = false;
             }
+
+            if (options === undefined || options.replace || options.replace === undefined)
+                if (mode === 'history') {
+                    history.pushState(null, null, root + _clearSlashes(path));
+                } else if (mode === 'hash') {
+                    window.location.href.match(/#(.*)$/);
+                    window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
+                } else {
+                    this.check(path, true);
+                }
+            else
+                this.check(path, false);
         },
 
         config: function (options) {
@@ -292,6 +308,10 @@ var Router = (function (facade) {
 
         remove: function (alias) {
             return facade.remove(alias);
+        },
+
+        getCurrent: function () {
+            return lastURL;
         }
     };
 
