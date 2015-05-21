@@ -766,6 +766,79 @@ describe("0.1: Routing checking", function () {
     });
 
 
+    it("0.1.36: Saving rote in history without navigate", function (done) {
+        var sequence = '';
+        Router
+            .add('/about', function () {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function () {
+                sequence += '2';
+                return false;
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function () {
+                sequence += '3';
+            })
+            .add('/stub', function () {
+                sequence += '4';
+            });
+
+        Router.navigate('/about/docs');
+        Router.navigate('/about/docs/about');
+        Router.navigate('/about/docs/stub');
+        (Router.getCurrent()).should.equal('/about/docs/about');
+
+        setTimeout(function () {
+            sequence.should.equal('12124');
+            done();
+        }, 50);
+    });
+
+    it("0.1.36: Saving rote in history without navigate", function (done) {
+        var sequence = '';
+        Router
+            .add('/about', function () {
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function (complete) {
+                complete(false);
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function () {
+                sequence += '3';
+            })
+            .add('/stub', function () {
+                sequence += '4';
+            });
+
+        Router.navigate('/about/docs');
+        Router.navigate('/about/docs/about');
+        Router.navigate('/about/docs/stub');
+        (Router.getCurrent()).should.equal('/about/docs/about');
+
+        setTimeout(function () {
+            sequence.should.equal('12124');
+            done();
+        }, 50);
+    });
+
+
 });
 
 

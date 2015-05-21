@@ -144,7 +144,7 @@ RoutingLevel.prototype.check = function (fragment, array, lastURL) {
                 params: params,
                 routes: [],
                 async: route.async,
-                shouldRoute: this._options.rerouting || should
+                rootRerouting: this._options.rerouting || should
             };
             array.push(node);
 
@@ -193,126 +193,132 @@ RoutingLevel.prototype.to = function (alias) {
 };
 
 var Router = (function (facade) {
-    var lastURL = '', trigger = true;
+    var lastURL = '', trigger = true, router = {};
+
+    function applyNested(routes) {
+        return function (param) {
+            if (param === false) {
+                // todo reject or redirect
+                console.log('todo reject or redirect')
+                //router.navigate(oldURL, {trigger: false});
+            } else if(typeof param === 'string') {
+                //router.navigate(param);
+            } else if (routes && routes.length)
+                apply(routes);
+        }
+    }
 
     function apply(routes) {
-        function applyNested(routes) {
-            return function () {
-                if (routes.length)
-                    apply(routes);
-            }
-        }
+        var falseToReject;
 
         if (routes)
             for (var i = 0, route; i < routes.length, route = routes[i]; i += 1) {
                 if (typeof route.async === 'number')
                     route.params.splice(route.async, 0, applyNested(route.routes));
 
-                if (route.shouldRoute)
-                    route.callback.apply(null, route.params);
-
-                if (route.routes.length && typeof route.async !== 'number')
-                    apply(route.routes);
+                if (route.rootRerouting) {
+                    falseToReject = route.callback.apply(null, route.params);
+                }
+                if (typeof route.async !== 'number') {
+                    applyNested(route.routes)(falseToReject);
+                }
             }
     }
 
-    function _getFragment() {
-        var fragment = '', mode = facade._options.mode, root = facade._options.root;
+    router.check = function (path, saveURL) { // todo remove saveURL
+        if (trigger) {
+            apply(facade.check(path, [], lastURL));
+        } else
+            trigger = true;
+
+        if (saveURL || saveURL === undefined)
+            lastURL = path;
+
+        return facade;
+    };
+
+    router.drop = function () {
+        lastURL = '';
+        return facade.drop();
+    };
+
+    router.listen = function () {
+        var self = this, current = this.getCurrent();
+
+        function check() {
+            var location = self.getCurrent();
+            if (current !== location) {
+                current = location;
+                self.check(current);
+            }
+        }
+
+        clearInterval(this._interval);
+        this._interval = setInterval(function () {
+            check();
+        }, 50);
+
+        window.onpopstate = function (e) {
+            if (e.state !== null && e.state !== undefined) {
+                clearInterval(self._interval);
+                check();
+            }
+        };
+    };
+
+    router.navigate = function (path, options) {
+        var mode = facade._options.mode, root = facade._options.root;
+        path = path ? path : '';
+
+        if (options && options.trigger === false) {
+            trigger = false;
+        }
+
+        if (options === undefined || options.replace || options.replace === undefined)
+            if (mode === 'history') {
+                history.pushState(null, null, root + _clearSlashes(path));
+            } else if (mode === 'hash') {
+                window.location.href.match(/#(.*)$/);
+                window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
+            } else {
+                this.check(path, true);
+            }
+        else
+            this.check(path, false);
+    };
+
+    router.config = function (options) {
+        return facade.config(options);
+    };
+
+    router.to = function (alias) {
+        return facade.to(alias);
+    };
+
+    router.add= function (path, callback, alias) {
+        return facade.add(path, callback, alias);
+    };
+
+    router.remove = function (alias) {
+        return facade.remove(alias);
+    };
+
+    router.getCurrent = function () {
+        var mode = facade._options.mode, root = facade._options.root, fragment = lastURL;
         if (mode === 'history') {
             fragment = _clearSlashes(decodeURI(location.pathname + location.search));
             fragment = fragment.replace(/\?(.*)$/, '');
             fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-
+            fragment = _clearSlashes(fragment);
         } else if (mode === 'hash') {
             var match = window.location.href.match(/#(.*)$/);
             fragment = match ? match[1] : '';
+            fragment = _clearSlashes(fragment);
         }
 
-        return _clearSlashes(fragment);
-    }
-
-    return {
-        check: function (path, saveURL) {
-            if (trigger) {
-                apply(facade.check(path, [], lastURL));
-            } else
-                trigger = true;
-
-            if (saveURL || saveURL === undefined)
-                lastURL = path;
-
-            return facade;
-        },
-
-        drop: function () {
-            lastURL = '';
-            return facade.drop();
-        },
-
-        listen: function () {
-            var self = this, current = _getFragment();
-
-            function check() {
-                var location = _getFragment();
-                if (current !== location) {
-                    current = location;
-                    self.check(current);
-                }
-            }
-
-            clearInterval(this._interval);
-            this._interval = setInterval(function () {
-                check();
-            }, 50);
-
-            window.onpopstate = function (e) {
-                if (e.state !== null && e.state !== undefined) {
-                    clearInterval(self._interval);
-                    check();
-                }
-            };
-        },
-
-        navigate: function (path, options) {
-            var mode = facade._options.mode, root = facade._options.root;
-            path = path ? path : '';
-
-            if (options && options.trigger === false) {
-                trigger = false;
-            }
-
-            if (options === undefined || options.replace || options.replace === undefined)
-                if (mode === 'history') {
-                    history.pushState(null, null, root + _clearSlashes(path));
-                } else if (mode === 'hash') {
-                    window.location.href.match(/#(.*)$/);
-                    window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
-                } else {
-                    this.check(path, true);
-                }
-            else
-                this.check(path, false);
-        },
-
-        config: function (options) {
-            return facade.config(options);
-        },
-
-        to: function (alias) {
-            return facade.to(alias);
-        },
-
-        add: function (path, callback, alias) {
-            return facade.add(path, callback, alias);
-        },
-
-        remove: function (alias) {
-            return facade.remove(alias);
-        },
-
-        getCurrent: function () {
-            return lastURL;
-        }
+        return fragment;
     };
+
+    return router;
 
 })(new RoutingLevel());
