@@ -105,11 +105,11 @@ function RoutingLevel() {
     this._options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
 }
 
-RoutingLevel.prototype.add = function (path, callback, alias) {
+RoutingLevel.prototype.add = function (path, callback, options) {
     var keys, re;
 
     if (typeof path == 'function') {
-        alias = callback;
+        options = callback;
         callback = path;
         re = _DEFAULT_ROUTE;
     } else {
@@ -118,11 +118,11 @@ RoutingLevel.prototype.add = function (path, callback, alias) {
     }
 
     this._routes.push({
-        async: _asyncDetect(callback),
+        async: (options && typeof options.async === 'number') ? options.async : _asyncDetect(callback),
         path: re,
         callback: callback,
         keys: keys,
-        alias: alias || path,
+        alias: (options && options.alias) ? options.alias : path,
         facade: null
     });
 
@@ -204,14 +204,15 @@ RoutingLevel.prototype.to = function (alias) {
 };
 
 var Router = (function (facade) {
-    var router = {}, lastURL = '', navigation = {trigger: true, replace: true};
+    var router = {}, lastURL = '', rollback = false;
 
     function applyNested(routes) {
         return function (param) {
             if (param === false) {
-                router.navigate(lastURL, {trigger: false});
+                rollback = true;
+                router.navigate(lastURL);
             } else if (typeof param === 'string') {
-                router.navigate(param);
+                router.route(param);
             } else if (routes && routes.length)
                 apply(routes);
         }
@@ -233,19 +234,6 @@ var Router = (function (facade) {
                 }
             }
     }
-
-    router.check = function (path) {
-        if (navigation.trigger)
-            apply(facade.check(path, [], lastURL));
-
-        if (navigation.replace)
-            lastURL = path;
-
-        navigation.trigger = true;
-        navigation.replace = true;
-
-        return facade;
-    };
 
     router.drop = function () {
         lastURL = '';
@@ -273,23 +261,36 @@ var Router = (function (facade) {
         };
     };
 
-    router.navigate = function (path, options) {
-        var mode = facade._options.mode, root = facade._options.root;
+    router.check = function (path) {
+        apply(facade.check(path, [], lastURL));
+        return facade;
+    };
 
-        path = path ? path : '';
-        navigation.trigger = !(options && options.trigger === false);
-        navigation.replace = !(options && options.replace === false);
-
-        if (navigation.replace && mode !== 'node')
-            if (mode === 'history') {
+    router.navigate = function (path) {
+        var mode = facade._options.mode;
+        switch (mode) {
+            case 'history':
                 history.pushState(null, null, root + _clearSlashes(path));
-            } else {
+                break;
+            case 'hash':
                 window.location.href.match(/#(.*)$/);
                 window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
-            }
-        else {
-            this.check(path);
+                break;
+            case 'node':
+                lastURL = path;
+                break;
         }
+        return facade;
+    };
+
+    router.route = function (path) {
+        if (facade._options.mode === 'node')
+            this.check(path);
+        if (!rollback)
+            this.navigate(path);
+        rollback = false;
+
+        return facade;
     };
 
     router.config = function (options) {

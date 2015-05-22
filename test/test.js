@@ -17,7 +17,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('about');
+        Router.route('about');
     });
 
     it("0.1.2: Nested routing", function (done) {
@@ -35,7 +35,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('about/docs');
+        Router.route('about/docs');
     });
 
     it("0.1.3: Nested routing (more levels)", function (done) {
@@ -61,7 +61,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('about/docs/about');
+        Router.route('about/docs/about');
     });
 
     it("0.1.4: Expression routing with parameters", function (done) {
@@ -71,7 +71,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about/16');
+        Router.route('/about/16');
     });
 
     it("0.1.5: Expression routing with query", function (done) {
@@ -82,7 +82,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about?first=5&second=6');
+        Router.route('/about?first=5&second=6');
     });
 
     it("0.1.6: Expression routing with parameters & query", function (done) {
@@ -95,7 +95,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about/16/18?first=5&second=6');
+        Router.route('/about/16/18?first=5&second=6');
     });
 
     it("0.1.7: Nested routing with parameters", function (done) {
@@ -115,7 +115,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/16/18/docs');
+        Router.route('/about/16/18/docs');
     });
 
     it("0.1.8: Nested routing with parameters two levels", function (done) {
@@ -141,7 +141,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/16/18?first=5/docs/17/19?second=7');
+        Router.route('/about/16/18?first=5/docs/17/19?second=7');
     });
 
     it("0.1.9: Expression routing with parameters (keysof mode)", function (done) {
@@ -152,7 +152,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about/16/18');
+        Router.route('/about/16/18');
     });
 
 
@@ -166,7 +166,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about/16/18?first=1&second=2');
+        Router.route('/about/16/18?first=1&second=2');
     });
 
     it("0.1.11: Nested routing with parameters two levels (keyoff mode)", function (done) {
@@ -187,7 +187,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/16/18?first=5/docs/17/19?second=7');
+        Router.route('/about/16/18?first=5/docs/17/19?second=7');
     });
 
 
@@ -199,7 +199,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about/16/route/18');
+        Router.route('/about/16/route/18');
     });
 
     it("0.1.13: Nested routing with parameters two levels", function (done) {
@@ -219,7 +219,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/16/todo/18?first=5/docs/17/19?second=7');
+        Router.route('/about/16/todo/18?first=5/docs/17/19?second=7');
     });
 
     it("0.1.14: Nested routing with parameters two levels (keyoff mode)", function (done) {
@@ -240,7 +240,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/16/todo/18?first=5/docs/17/19?second=7');
+        Router.route('/about/16/todo/18?first=5/docs/17/19?second=7');
     });
 
     it("0.1.15: Remove string expression routing via string", function (done) {
@@ -251,7 +251,7 @@ describe("0.1: Routing checking", function () {
         });
 
         Router.remove('/about');
-        Router.check('/about');
+        Router.route('/about');
 
         setTimeout(function () {
             flag.should.equal(false);
@@ -273,7 +273,7 @@ describe("0.1: Routing checking", function () {
             });
 
         Router.remove('/about');
-        Router.check('/about/docs');
+        Router.route('/about/docs');
 
         setTimeout(function () {
             sequence.should.equal('');
@@ -295,7 +295,7 @@ describe("0.1: Routing checking", function () {
             });
 
         Router.to('/about').remove('/docs');
-        Router.check('/about/docs');
+        Router.route('/about/docs');
 
         setTimeout(function () {
             sequence.should.equal('1');
@@ -310,10 +310,10 @@ describe("0.1: Routing checking", function () {
         Router
             .add('/about', function () {
                 flag = true;
-            }, alias)
+            }, {alias: alias})
             .add('/doc', function () {
                 flag = true;
-            }, alias);
+            }, {alias: alias});
 
         Router.remove(alias);
 
@@ -335,7 +335,7 @@ describe("0.1: Routing checking", function () {
         Router.add('/about', callback);
 
         Router.remove(callback);
-        Router.check('/about');
+        Router.route('/about');
 
         setTimeout(function () {
             flag.should.equal(false);
@@ -351,7 +351,7 @@ describe("0.1: Routing checking", function () {
             done();
         }.bind(context));
 
-        Router.check('/about');
+        Router.route('/about');
     });
 
     it("0.1.21: Default routing", function (done) {
@@ -359,7 +359,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about');
+        Router.route('/about');
     });
 
     it("0.1.22: Default nested routing", function (done) {
@@ -380,7 +380,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/default');
+        Router.route('/about/default');
     });
 
     it("0.1.23: Path routing", function (done) {
@@ -389,7 +389,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/file/dir/file.jpg');
+        Router.route('/file/dir/file.jpg');
     });
 
     it("0.1.24: Path routing with parameters", function (done) {
@@ -400,7 +400,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/file/dir/file.jpg?first=1&second=2');
+        Router.route('/file/dir/file.jpg?first=1&second=2');
     });
 
     it("0.1.25: () routing", function (done) {
@@ -409,8 +409,8 @@ describe("0.1: Routing checking", function () {
             counter++;
         });
 
-        Router.check('/docs');
-        Router.check('/docs/');
+        Router.route('/docs');
+        Router.route('/docs/');
 
         setTimeout(function () {
             counter.should.equal(2);
@@ -425,7 +425,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/docs?first=1&second=2');
+        Router.route('/docs?first=1&second=2');
     });
 
     it("0.1.27: () nested routing with parameters", function (done) {
@@ -442,7 +442,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/docs?first=1&second=2/about');
+        Router.route('/docs?first=1&second=2/about');
     });
 
     it("0.1.28: () routing", function (done) {
@@ -454,8 +454,8 @@ describe("0.1: Routing checking", function () {
             }
         });
 
-        Router.check('/docs/1');
-        Router.check('/docs/2/3');
+        Router.route('/docs/1');
+        Router.route('/docs/2/3');
 
         setTimeout(function () {
             counter.should.equal(6);
@@ -479,9 +479,9 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        //todo Router.check('/docs/1/about'); так не сработает т.к. '/about' будет восприниматся как (/:subsection)
+        //todo Router.route('/docs/1/about'); так не сработает т.к. '/about' будет восприниматся как (/:subsection)
         // а не как nested routing, удалить из тестов
-        Router.check('/docs/2/3/about');
+        Router.route('/docs/2/3/about');
 
         //setTimeout(function () {
         //    counter.should.equal(6);
@@ -499,8 +499,8 @@ describe("0.1: Routing checking", function () {
             queryCounter += parseInt(params.query.first, 10);
         });
 
-        Router.check('/docs/1?first=1');
-        Router.check('/docs/2/3?first=2');
+        Router.route('/docs/1?first=1');
+        Router.route('/docs/2/3?first=2');
 
         setTimeout(function () {
             counter.should.equal(6);
@@ -527,7 +527,7 @@ describe("0.1: Routing checking", function () {
                 done();
             });
 
-        Router.check('/about/docs');
+        Router.route('/about/docs');
     });
 
     it("0.1.31: Async nested routing with parameters & query", function (done) {
@@ -558,7 +558,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about?first=1&second=2/docs/16?third=3/about');
+        Router.route('/about?first=1&second=2/docs/16?third=3/about');
     });
 
     it("0.1.32: Async nested routing with parameters & query (keyoff mode)", function (done) {
@@ -590,7 +590,7 @@ describe("0.1: Routing checking", function () {
             done();
         });
 
-        Router.check('/about?first=1&second=2/docs/16?third=3/about');
+        Router.route('/about?first=1&second=2/docs/16?third=3/about');
     });
 
     it("0.1.33: Nested routing (rerouting:true)", function (done) {
@@ -618,9 +618,9 @@ describe("0.1: Routing checking", function () {
                 sequence += '4';
             });
 
-        Router.check('/about/docs');
-        Router.check('/about/docs/about');
-        Router.check('/about/docs/stub');
+        Router.route('/about/docs');
+        Router.route('/about/docs/about');
+        Router.route('/about/docs/stub');
 
         setTimeout(function () {
             sequence.should.equal('12123124');
@@ -654,9 +654,9 @@ describe("0.1: Routing checking", function () {
                 sequence += '4';
             });
 
-        Router.check('/about/docs');
-        Router.check('/about/docs/about');
-        Router.check('/about/docs/stub');
+        Router.route('/about/docs');
+        Router.route('/about/docs/about');
+        Router.route('/about/docs/stub');
 
         setTimeout(function () {
             sequence.should.equal('1234');
@@ -685,11 +685,11 @@ describe("0.1: Routing checking", function () {
             });
 
         (Router.getCurrent()).should.equal('');
-        Router.check('/about/docs');
+        Router.route('/about/docs');
         (Router.getCurrent()).should.equal('/about/docs');
-        Router.check('/about/docs/about');
+        Router.route('/about/docs/about');
         (Router.getCurrent()).should.equal('/about/docs/about');
-        Router.check('/about/docs/stub');
+        Router.route('/about/docs/stub');
         (Router.getCurrent()).should.equal('/about/docs/stub');
     });
 
@@ -718,9 +718,9 @@ describe("0.1: Routing checking", function () {
                 sequence += '4';
             });
 
-        Router.navigate('/about/docs');
-        Router.navigate('/about/docs/about');
-        Router.navigate('/about/docs/stub', {replace: false});
+        Router.check('/about/docs');
+        Router.route('/about/docs/about');
+        Router.check('/about/docs/stub');
         (Router.getCurrent()).should.equal('/about/docs/about');
 
         setTimeout(function () {
@@ -755,19 +755,20 @@ describe("0.1: Routing checking", function () {
             });
 
         Router.navigate('/about/docs');
-        Router.navigate('/about/docs/about', {trigger: false});
-        Router.navigate('/about/docs/stub', {replace: false});
-        (Router.getCurrent()).should.equal('/about/docs/about');
+        Router.route('/about/docs/about');
+        Router.navigate('/about/docs/stub');
+        (Router.getCurrent()).should.equal('/about/docs/stub');
 
         setTimeout(function () {
-            sequence.should.equal('12124');
+            sequence.should.equal('123');
             done();
         }, 50);
     });
 
 
-    it("0.1.36: Saving rote in history without navigate", function (done) {
+    it("0.1.37: Sync rollback", function () {
         var sequence = '';
+
         Router
             .add('/about', function () {
                 sequence += '1';
@@ -780,64 +781,42 @@ describe("0.1: Routing checking", function () {
                 return false;
             });
 
-        var aboutDocs = Router
-            .to('/about')
-            .to('/docs');
-
-        aboutDocs
+        Router.to('/about').to('/docs')
             .add('/about', function () {
                 sequence += '3';
-            })
-            .add('/stub', function () {
-                sequence += '4';
             });
 
-        Router.navigate('/about/docs');
-        Router.navigate('/about/docs/about');
-        Router.navigate('/about/docs/stub');
-        (Router.getCurrent()).should.equal('/about/docs/about');
+        Router.route('/about/docs/about');
 
-        setTimeout(function () {
-            sequence.should.equal('12124');
-            done();
-        }, 50);
+        (Router.getCurrent()).should.equal('');
+        (sequence).should.equal('12');
     });
 
-    it("0.1.36: Saving rote in history without navigate", function (done) {
+    it("0.1.37: Async rollback", function () {
         var sequence = '';
+
         Router
             .add('/about', function () {
+                sequence += '1';
             });
 
         Router
             .to('/about')
             .add('/docs', function (complete) {
+                sequence += '2';
                 complete(false);
             });
 
-        var aboutDocs = Router
-            .to('/about')
-            .to('/docs');
-
-        aboutDocs
+        Router.to('/about').to('/docs')
             .add('/about', function () {
                 sequence += '3';
-            })
-            .add('/stub', function () {
-                sequence += '4';
             });
 
-        Router.navigate('/about/docs');
-        Router.navigate('/about/docs/about');
-        Router.navigate('/about/docs/stub');
-        (Router.getCurrent()).should.equal('/about/docs/about');
+        Router.route('/about/docs/about');
 
-        setTimeout(function () {
-            sequence.should.equal('12124');
-            done();
-        }, 50);
+        (Router.getCurrent()).should.equal('');
+        (sequence).should.equal('12');
     });
-
 
 });
 
