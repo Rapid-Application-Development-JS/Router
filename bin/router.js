@@ -133,6 +133,10 @@ RoutingLevel.prototype.remove = function (alias) {
     for (var i = this._routes.length - 1, r; i > -1, r = this._routes[i]; i -= 1) {
         if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
             this._routes.splice(i, 1);
+        } else if (r._routes.length > 0) {
+            for (var j = r._routes.length - 1; j > -1; j -= 1) {
+                r._routes[j].remove(alias);
+            }
         }
     }
 
