@@ -44,7 +44,7 @@ Router
 	.add(about, function(params) { // ~about ('/about/:id')
 		// todo your code
 	})
-	.add(posts, function(params, complite) { // ~posts ('/posts')
+	.add(posts, function(params, complete) { // ~posts ('/posts')
 		// todo your code
 		complete(); // do it by async way 
 	})
@@ -79,7 +79,7 @@ Router
 	.add(posts + newPost, function(params) { // only one callback for full URL
 		// todo your code
 	})
-	.add(posts, function(params, complite) { // ~posts ('/posts')
+	.add(posts, function(params, complete) { // ~posts ('/posts')
 		// todo your code
 		complete(); // do it by async way 
 	})
