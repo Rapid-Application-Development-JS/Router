@@ -126,6 +126,11 @@ RoutingLevel.prototype.add = function (path, callback, options) {
         facade: null
     });
 
+    // sort DESC by path length
+    this._routes.sort(function(a, b) {
+        return b.alias.length - a.alias.length;
+    });
+
     return this;
 };
 
