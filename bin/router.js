@@ -274,7 +274,7 @@ var Router = (function (facade) {
         var mode = facade._options.mode;
         switch (mode) {
             case 'history':
-                history.pushState(null, null, root + _clearSlashes(path));
+                history.pushState(null, null, facade._options.root + _clearSlashes(path));
                 break;
             case 'hash':
                 window.location.href.match(/#(.*)$/);
