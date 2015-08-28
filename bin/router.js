@@ -126,6 +126,11 @@ RoutingLevel.prototype.add = function (path, callback, options) {
         facade: null
     });
 
+    // sort DESC by path length
+    this._routes.sort(function(a, b) {
+        return b.alias.length - a.alias.length;
+    });
+
     return this;
 };
 
@@ -319,11 +324,11 @@ var Router = (function (facade) {
             fragment = _clearSlashes(decodeURI(location.pathname + location.search));
             fragment = fragment.replace(/\?(.*)$/, '');
             fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-            fragment = _clearSlashes(fragment);
+            //fragment = _clearSlashes(fragment);
         } else if (mode === 'hash') {
             var match = window.location.href.match(/#(.*)$/);
             fragment = match ? match[1] : '';
-            fragment = _clearSlashes(fragment);
+            //fragment = _clearSlashes(fragment);
         }
 
         return fragment;
