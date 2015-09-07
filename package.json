@@ -1,5 +1,5 @@
 {
-  "name": "untitled1",
+  "name": "RAD.js Router",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
@@ -10,11 +10,11 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "gulp": "~3.8.11",
-    "gulp-concat": "~2.5.2",
-    "gulp-uglify": "~1.2.0",
-    "gulp-wrap-umd": "~0.2.1",
-    "run-sequence": "~1.0.2",
-    "mocha": "~2.2.4",
-    "chai": "~2.3.0"
+    "gulp-concat": "^2.6.0",
+    "gulp-uglify": "^1.4.0",
+    "gulp-wrap-umd": "^0.2.1",
+    "run-sequence": "^1.1.2",
+    "mocha": "^2.3.1",
+    "chai": "^3.2.0"
   }
 }

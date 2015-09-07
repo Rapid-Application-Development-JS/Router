@@ -1,3 +1,4 @@
+
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(factory);
@@ -21,7 +22,12 @@ var _DEFAULT_ROUTE = /.*/;
 var _FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
 var _STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 
-    //returns array of route keys
+/**
+ * Accept route path and returns array of route keys
+ * @param string
+ * @returns {Array|{index: number, input: string}}
+ * @private
+ */
 function _getRouteKeys(string) {
     var keys = string.match(/:([^\/]+)/g);
     for (var i = 0, l = keys ? keys.length : 0; i < l; i++) {
@@ -30,7 +36,12 @@ function _getRouteKeys(string) {
     return keys;
 }
 
-    //converts route into regular expression
+/**
+ * Accepts route path and returns regular expression
+ * @param route
+ * @returns {RegExp}
+ * @private
+ */
 function _routeToRegExp(route) {
     route = route.replace(_ESCAPE_REG_EXP, '\\$&')
         .replace(_OPTIONAL_PARAM, '(?:$1)?')
@@ -42,34 +53,63 @@ function _routeToRegExp(route) {
     return new RegExp('^' + route + '(?:\\?*([^/]*))');
 }
 
-    //clears slashes from the route path
+/**
+ * Returns accepted route path without slashes
+ * @param path
+ * @returns {string}
+ * @private
+ */
 function _clearSlashes(path) {
     return path.toString().replace(/\/$/, '').replace(/^\//, '');
 }
 
-    //returns array of parameters
+/**
+ * Accepts Regular Expression and path
+ * Returns array of path parameters
+ * @param route
+ * @param fragment
+ * @returns {Array}
+ * @private
+ */
 function _extractParameters(route, fragment) {
     var params = route.exec(fragment).slice(1);
 
-    return params.map(function (param, i) {
+    var map = params.map(function (param, i) {
         if (i === params.length - 1) return param || null;
         return param ? decodeURIComponent(param) : null;
     });
+
+    return map;
 }
 
+/**
+ * Accepts string object and returns object with that string as attribute's key
+ * @param qstr
+ * @returns {*}
+ * @private
+ */
 function _parseQuery(qstr) {
     var query, params, pair;
     if (typeof qstr === 'string') {
         query = {};
         params = qstr.split('&');
-        for (var i = 0; params, i < params.length; i++) {
+        for (var i = 0; i < params.length; i++) {
             pair = params[i].split('=');
             query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
         }
     }
+
     return query;
 }
 
+/**
+ * Accepts 'parameters' and 'keys' arrays,
+ * Returns array of objects with keys from 'keys' argument and values from parameters argument
+ * @param parameters
+ * @param keys
+ * @returns {*}
+ * @private
+ */
 function _prepareArguments(parameters, keys) {
     var wrapper = {}, lastIndex = parameters.length - 1, query = parameters[lastIndex];
 
@@ -77,10 +117,13 @@ function _prepareArguments(parameters, keys) {
         for (var i = 0; i < keys.length; i++) {
             wrapper[keys[i]] = parameters[i];
         }
+
         if (parameters[i]) {
             wrapper.query = _parseQuery(parameters[i]);
         }
+
         parameters = [wrapper];
+
     } else if (query && query.indexOf('=') > -1) {
         parameters[lastIndex] = _parseQuery(query);
     }
@@ -88,7 +131,12 @@ function _prepareArguments(parameters, keys) {
     return parameters;
 }
 
-    //checks if fn has an argument 'complete' and returns its index
+/**
+ * Checks if argument function 'fn' has an argument named 'complete' and returns its index
+ * @param fn
+ * @returns {*}
+ * @private
+ */
 function _asyncDetect(fn) {
     var result = null, args;
 
@@ -109,6 +157,15 @@ function RoutingLevel() {
     this._options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
 }
 
+/**
+ * Adds new route to Router
+ * @param path (string) - string
+ * @param callback (function) - callback function function that will be called by a certain path
+ * @param options (object) - may contain 2 attributes: alias: sting and async: integer
+ *  alias - is for deleting the record from the routing table and grouping.
+ *  async - is a service parameter for designation of the ordinal number of the
+ *  controlling function complete in the parameters
+ */
 RoutingLevel.prototype.add = function (path, callback, options) {
     var keys, re;
 
@@ -131,13 +188,18 @@ RoutingLevel.prototype.add = function (path, callback, options) {
     });
 
     // sort DESC by path length
-    this._routes.sort(function(a, b) {
+    this._routes.sort(function (a, b) {
         return b.alias.length - a.alias.length;
     });
 
     return this;
 };
 
+/**
+ * Removes a record in the routing table.
+ * As a parameter you may transmit path, alias, or callback; the corresponding record will be removed from the table.
+ * @param alias (path, alias, or callback)
+ */
 RoutingLevel.prototype.remove = function (alias) {
     for (var i = this._routes.length - 1, r; i > -1, r = this._routes[i]; i--) {
         if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
@@ -152,12 +214,18 @@ RoutingLevel.prototype.remove = function (alias) {
     return this;
 };
 
-    //checks for routes and returns array of matched routes
+/**
+ * Calls the callback methods that are registered for this URL without changing router location
+ * @param fragment
+ * @param array
+ * @param lastURL
+ */
 RoutingLevel.prototype.check = function (fragment, array, lastURL) {
     var match, node, route, params, should;
 
     for (var i = 0; i < this._routes.length, route = this._routes[i]; i++) {
         match = fragment.match(route.path);
+
         if (match) {
             params = _extractParameters(route.path, fragment);
             keys = this._options.keys ? route.keys : null;
@@ -185,7 +253,9 @@ RoutingLevel.prototype.check = function (fragment, array, lastURL) {
     return array;
 };
 
-    //resets options to default and removes all saved routes
+/**
+ * Resets the settings and routing table for the current level; all lower levels will be reset automatically.
+ */
 RoutingLevel.prototype.drop = function () {
     this._routes = [];
     this.config(_DEFAULT_OPTIONS);
@@ -193,7 +263,12 @@ RoutingLevel.prototype.drop = function () {
     return this;
 };
 
-    //sets options to options in given object
+/**
+ * Configures the current level of the router.
+ * Accepts object
+ * @public
+ * @param {Object} options
+ */
 RoutingLevel.prototype.config = function (options) {
     if (typeof options === 'object') {
         this._options.keys = (typeof options.keys === 'boolean') ? options.keys : this._options.keys;
@@ -205,7 +280,10 @@ RoutingLevel.prototype.config = function (options) {
     return this;
 };
 
-    //use 'to' before using 'add' to create embedded level of the router
+/**
+ * Uses in pair with 'add' function to create subpath
+ * @param alias
+ */
 RoutingLevel.prototype.to = function (alias) {
     var subrouter, route;
     for (var i = 0; i < this._routes.length, route = this._routes[i]; i++) {
@@ -235,10 +313,14 @@ var Router = (function (facade) {
         }
     }
 
+    /**
+     *
+     * @param routes
+     */
     function apply(routes) {
         var falseToReject;
 
-        if (routes)
+        if (routes) {
             for (var i = 0, route; i < routes.length, route = routes[i]; i++) {
                 if (typeof route.async === 'number') {
                     route.params.splice(route.async, 0, applyNested(route.routes));
@@ -250,13 +332,24 @@ var Router = (function (facade) {
                     applyNested(route.routes)(falseToReject);
                 }
             }
+        }
     }
 
+    /**
+     * Resets the settings and routing table for the current level; all lower levels will be reset automatically.
+     * @example Router.drop();
+     * @public
+     */
     router.drop = function () {
         lastURL = '';
         return facade.drop();
     };
 
+    /**
+     * Launches the router for monitoring a route in a browser.
+     * Basic level routes only.
+     * @example Router.listen();
+     */
     router.listen = function () {
         var self = this, current = this.getCurrent();
 
@@ -278,11 +371,23 @@ var Router = (function (facade) {
         };
     };
 
+    /**
+     * Calls the callback methods that are registered for this URL without changing router location
+     * @param path
+     * @example Router.check('someURL');;
+     * @public
+     */
     router.check = function (path) {
         apply(facade.check(path, [], lastURL));
         return facade;
     };
 
+    /**
+     * Calls a change of router location without firing callback methods.
+     * @param path
+     * @example Router.navigate('someURL');
+     * @public
+     */
     router.navigate = function (path) {
         var mode = facade._options.mode;
         switch (mode) {
@@ -299,6 +404,12 @@ var Router = (function (facade) {
         return facade;
     };
 
+    /**
+     * Switches the router to a new URL, firing the registered callback methods to execution.
+     * @param path
+     * @example Router.route('someURL');
+     * @public
+     */
     router.route = function (path) {
         if (facade._options.mode === 'node')
             this.check(path);
@@ -309,23 +420,71 @@ var Router = (function (facade) {
         return facade;
     };
 
+    /**
+     * Configures the current level of the router.
+     * Accepts object
+     * @public
+     * @param {Object} options
+     * @example Router.config({
+         *              mode: 'history',
+         *              keys: true,
+         *              rerouting: false,
+         *              root: '/'
+         *          });
+     * @public
+     */
     router.config = function (options) {
         return facade.config(options);
     };
 
+    /**
+     * Uses in pair with 'add' function to create subpath
+     * @param alias
+     * @example Router.to('path').add('/subpath');
+     * @public
+     */
     router.to = function (alias) {
         return facade.to(alias);
     };
 
-    router.add = function (path, callback, alias) {
-        return facade.add(path, callback, alias);
+    /**
+     * Adds new route to Router
+     * @param path (string) - string
+     * @param callback (function) - callback function function that will be called by a certain path
+     * @param options (object) - may contain 2 attributes: alias: sting and async: integer
+     *  alias - is for deleting the record from the routing table and grouping.
+     *  async - is a service parameter for designation of the ordinal number of the
+     *  controlling function complete in the parameters
+     * @example Router
+     *              .add('docs/:id', function (param, complete){
+                        // do something
+                        complete();
+                        }, {alias: 'docs', async: 1}).
+     add('docs/new', function (param) {
+                        // do something
+                        }, {alias: 'docs'});
+     * @public
+     */
+    router.add = function (path, callback, options) {
+        return facade.add(path, callback, options);
     };
 
+    /**
+     * Removes a record in the routing table.
+     * As a parameter you may transmit path, alias, or callback; the corresponding record will be removed from the table.
+     * @param alias (path, alias, or callback)
+     * @example Router.remove('/docs/:section');
+     * @public
+     */
     router.remove = function (alias) {
         return facade.remove(alias);
     };
 
-    //returns current path
+    /**
+     * Returns the current URL of the router.
+     * Note that this method is present only in the basic level of the router.
+     * @public
+     */
     router.getCurrent = function () {
         var mode = facade._options.mode, root = facade._options.root, fragment = lastURL;
         if (mode === 'history') {
