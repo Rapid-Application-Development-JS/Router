@@ -1,4 +1,3 @@
-
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(factory);
@@ -22,14 +21,16 @@ var _DEFAULT_ROUTE = /.*/;
 var _FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
 var _STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 
+    //returns array of route keys
 function _getRouteKeys(string) {
     var keys = string.match(/:([^\/]+)/g);
-    for (var i = 0, l = keys ? keys.length : 0; i < l; i += 1) {
+    for (var i = 0, l = keys ? keys.length : 0; i < l; i++) {
         keys[i] = keys[i].replace(/[:\(\)]/g, '');
     }
     return keys;
 }
 
+    //converts route into regular expression
 function _routeToRegExp(route) {
     route = route.replace(_ESCAPE_REG_EXP, '\\$&')
         .replace(_OPTIONAL_PARAM, '(?:$1)?')
@@ -41,10 +42,12 @@ function _routeToRegExp(route) {
     return new RegExp('^' + route + '(?:\\?*([^/]*))');
 }
 
+    //clears slashes from the route path
 function _clearSlashes(path) {
     return path.toString().replace(/\/$/, '').replace(/^\//, '');
 }
 
+    //returns array of parameters
 function _extractParameters(route, fragment) {
     var params = route.exec(fragment).slice(1);
 
@@ -71,7 +74,7 @@ function _prepareArguments(parameters, keys) {
     var wrapper = {}, lastIndex = parameters.length - 1, query = parameters[lastIndex];
 
     if (keys && keys.length > 0) {
-        for (var i = 0; i < keys.length; i += 1) {
+        for (var i = 0; i < keys.length; i++) {
             wrapper[keys[i]] = parameters[i];
         }
         if (parameters[i]) {
@@ -85,6 +88,7 @@ function _prepareArguments(parameters, keys) {
     return parameters;
 }
 
+    //checks if fn has an argument 'complete' and returns its index
 function _asyncDetect(fn) {
     var result = null, args;
 
@@ -135,11 +139,11 @@ RoutingLevel.prototype.add = function (path, callback, options) {
 };
 
 RoutingLevel.prototype.remove = function (alias) {
-    for (var i = this._routes.length - 1, r; i > -1, r = this._routes[i]; i -= 1) {
+    for (var i = this._routes.length - 1, r; i > -1, r = this._routes[i]; i--) {
         if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
             this._routes.splice(i, 1);
         } else if (r._routes.length > 0) {
-            for (var j = r._routes.length - 1; j > -1; j -= 1) {
+            for (var j = r._routes.length - 1; j > -1; j--) {
                 r._routes[j].remove(alias);
             }
         }
@@ -148,6 +152,7 @@ RoutingLevel.prototype.remove = function (alias) {
     return this;
 };
 
+    //checks for routes and returns array of matched routes
 RoutingLevel.prototype.check = function (fragment, array, lastURL) {
     var match, node, route, params, should;
 
@@ -180,6 +185,7 @@ RoutingLevel.prototype.check = function (fragment, array, lastURL) {
     return array;
 };
 
+    //resets options to default and removes all saved routes
 RoutingLevel.prototype.drop = function () {
     this._routes = [];
     this.config(_DEFAULT_OPTIONS);
@@ -187,6 +193,7 @@ RoutingLevel.prototype.drop = function () {
     return this;
 };
 
+    //sets options to options in given object
 RoutingLevel.prototype.config = function (options) {
     if (typeof options === 'object') {
         this._options.keys = (typeof options.keys === 'boolean') ? options.keys : this._options.keys;
@@ -198,9 +205,10 @@ RoutingLevel.prototype.config = function (options) {
     return this;
 };
 
+    //use 'to' before using 'add' to create embedded level of the router
 RoutingLevel.prototype.to = function (alias) {
     var subrouter, route;
-    for (var i = 0; i < this._routes.length, route = this._routes[i]; i += 1) {
+    for (var i = 0; i < this._routes.length, route = this._routes[i]; i++) {
         if (alias === route.alias) {
             subrouter = route.facade;
             if (!subrouter) {
@@ -231,7 +239,7 @@ var Router = (function (facade) {
         var falseToReject;
 
         if (routes)
-            for (var i = 0, route; i < routes.length, route = routes[i]; i += 1) {
+            for (var i = 0, route; i < routes.length, route = routes[i]; i++) {
                 if (typeof route.async === 'number') {
                     route.params.splice(route.async, 0, applyNested(route.routes));
                 }
@@ -282,7 +290,6 @@ var Router = (function (facade) {
                 history.pushState(null, null, facade._options.root + _clearSlashes(path));
                 break;
             case 'hash':
-                window.location.href.match(/#(.*)$/);
                 window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
                 break;
             case 'node':
@@ -318,17 +325,16 @@ var Router = (function (facade) {
         return facade.remove(alias);
     };
 
+    //returns current path
     router.getCurrent = function () {
         var mode = facade._options.mode, root = facade._options.root, fragment = lastURL;
         if (mode === 'history') {
             fragment = _clearSlashes(decodeURI(location.pathname + location.search));
             fragment = fragment.replace(/\?(.*)$/, '');
             fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-            //fragment = _clearSlashes(fragment);
         } else if (mode === 'hash') {
             var match = window.location.href.match(/#(.*)$/);
             fragment = match ? match[1] : '';
-            //fragment = _clearSlashes(fragment);
         }
 
         return fragment;
