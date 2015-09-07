@@ -104,11 +104,22 @@ function _parseQuery(qstr) {
 
 /**
  * Accepts 'parameters' and 'keys' arrays,
- * Returns array of objects with keys from 'keys' argument and values from parameters argument
+ * Returns array of objects with keys from 'keys' argument and values from parameters argument and with 'query'
+ * attribute that is object with attributes parsed from the last 'parameters' value
  * @param parameters
  * @param keys
  * @returns {*}
  * @private
+ * @example var result = _prepareArguments(["16", "lang=ua&country=ukraine&year=2015"], ["id"]);
+ * result will be array:
+ *              [{
+ *                  'id' : 16,
+ *                  query : {
+ *                      lang : ua,
+ *                      country : ukraine,
+ *                      year : 2015
+ *                  }
+ *              }]
  */
 function _prepareArguments(parameters, keys) {
     var wrapper = {}, lastIndex = parameters.length - 1, query = parameters[lastIndex];
@@ -118,8 +129,10 @@ function _prepareArguments(parameters, keys) {
             wrapper[keys[i]] = parameters[i];
         }
 
-        if (parameters[i]) {
-            wrapper.query = _parseQuery(parameters[i]);
+        for (var j = keys.length; j < parameters.length; j++) {
+            if (parameters[j]) {
+                wrapper.query = _parseQuery(parameters[j]);
+            }
         }
 
         parameters = [wrapper];
