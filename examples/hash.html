@@ -9,13 +9,17 @@
 
 <div><a href="#home">'home'</a></div>
 <div><a href="#docs/16">'docs/:id(16)'</a></div>
-<div><a href="#docs/16/paragraph/17">'docs/:id(16)/paragraph/:number(17)'</a></div>
+<div><a href="#docs/15?lang=rus&country=Ukraine&someParameter=someValue">
+    'docs/:id(15)?lang=rus&country=Ukraine&someParameter=someValue'</a></div>
+<div><a href="#docs/16?color=blue&size=20/paragraph/17?font=arial&weight=bold&someParameter=someValue">
+    'docs/:id(16)?color=blue&size=20/paragraph/:number(17)?font=arial&weight=bold&someParameter=someValue'</a></div>
 <div><a href="#default">'default'</a></div>
 
 <script type="text/javascript">
+
     function prettyJSON(object) {
         var result = '';
-        console.log(object)
+        console.log(object);
         if (typeof object === 'object') {
             result = '\n' + JSON.stringify(object,null,2);
         } else if(typeof object === 'string') {
@@ -30,7 +34,9 @@
     var subpathParagraph = '/paragraph/:number'; // !!! you must use '/' for nested routing
 
     Router
-            .config({mode: 'hash'})
+            .config({
+                mode: 'hash'
+            })
             .add(pathHome, function () {
                 alert(pathHome)
             })
@@ -42,13 +48,12 @@
                 Router.navigate(pathHome);
             });
 
-    Router
-            .to(pathDoc)
+    Router  .to(pathDoc)
             .add(subpathParagraph, function (params) {
                 alert(subpathParagraph + prettyJSON(params));
             });
 
-    Router.listen(); // todo listen & navigate
+    Router.listen();
     Router.navigate('home');
 
 </script>

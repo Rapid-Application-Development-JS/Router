@@ -55,7 +55,8 @@
                 Router.navigate('/home.html');
             });
 
-            Router.to('docs/:id')
+    Router
+            .to('docs/:id')
             .add('/paragraph/:id', function (params) {
                 alert('/paragraph/:id' + prettyJSON(params));
             });
